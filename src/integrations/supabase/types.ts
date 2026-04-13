@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          receiver_id: string | null
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          receiver_id?: string | null
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          receiver_id?: string | null
+          sender_id?: string
+        }
+        Relationships: []
+      }
       customer_media: {
         Row: {
           caption: string | null
@@ -40,6 +67,36 @@ export type Database = {
           file_url?: string
           id?: string
           name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          title?: string
+          type?: string
           user_id?: string
         }
         Relationships: []
@@ -122,6 +179,30 @@ export type Database = {
           snapchat?: string
           user_id?: string
           weight?: string | null
+        }
+        Relationships: []
+      }
+      user_points: {
+        Row: {
+          created_at: string
+          id: string
+          points: number
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          points?: number
+          reason?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          points?: number
+          reason?: string
+          user_id?: string
         }
         Relationships: []
       }
