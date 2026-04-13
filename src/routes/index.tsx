@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { CustomerHeader } from '@/components/CustomerHeader';
 
 export const Route = createFileRoute("/")({
   component: Index,
