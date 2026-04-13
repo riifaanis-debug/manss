@@ -254,8 +254,16 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
 
         {/* Section 2: Peek at Me */}
         <InteractivePeekSection 
-          onFeedbackUpdate={(index, rating, comment) => {
+          onFeedbackUpdate={async (index, rating, comment) => {
             setPeekFeedback(prev => ({ ...prev, [index]: { rating, comment } }));
+            // Award 53 points for rating
+            if (rating > 0 && user) {
+              await supabase.from('user_points').insert({
+                user_id: user.id,
+                points: 53,
+                reason: `تقييم المقطع ${index + 1}`,
+              }).then(() => {});
+            }
           }}
         />
 
