@@ -434,9 +434,16 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
 
                         if (subError) throw subError;
 
+                        // Award 53 points for interaction
+                        await supabase.from('user_points').insert({
+                          user_id: user!.id,
+                          points: 53,
+                          reason: 'تفاعل وتواصل',
+                        });
+
                         // Open Telegram
                         window.open(getTelegramUrl(), '_blank');
-                        showToast('تم حفظ بياناتك بنجاح!', 'success');
+                        showToast('تم حفظ بياناتك بنجاح! +53 نقطة ذهبية 🪙', 'success');
                         setTimeout(() => setIsContactModalOpen(false), 100);
                       } catch (err) {
                         console.error(err);
