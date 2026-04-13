@@ -172,16 +172,9 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
 
   return (
     <div className="min-h-screen flex flex-col items-center pb-20">
-      {/* Logout button */}
-      <div className="fixed top-4 left-4 z-50">
-        <button
-          onClick={async () => { await signOut(); navTo({ to: '/login' }); }}
-          className="flex items-center gap-1.5 bg-black/50 backdrop-blur-md text-white/70 hover:text-white rounded-full px-3 py-1.5 text-xs transition-all"
-        >
-          <LogOut className="w-3 h-3" />
-          خروج
-        </button>
-      </div>
+      {/* Customer Header */}
+      <CustomerHeader />
+      <div className="h-12" /> {/* Spacer for fixed header */}
       {/* Hero Section */}
       <header className="w-full aspect-square md:aspect-video md:h-[60vh] relative flex items-center justify-center overflow-hidden bg-zinc-900">
         <motion.div 
