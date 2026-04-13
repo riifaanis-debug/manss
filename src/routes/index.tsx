@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { CustomerHeader } from '@/components/CustomerHeader';
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -171,16 +172,9 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
 
   return (
     <div className="min-h-screen flex flex-col items-center pb-20">
-      {/* Logout button */}
-      <div className="fixed top-4 left-4 z-50">
-        <button
-          onClick={async () => { await signOut(); navTo({ to: '/login' }); }}
-          className="flex items-center gap-1.5 bg-black/50 backdrop-blur-md text-white/70 hover:text-white rounded-full px-3 py-1.5 text-xs transition-all"
-        >
-          <LogOut className="w-3 h-3" />
-          خروج
-        </button>
-      </div>
+      {/* Customer Header */}
+      <CustomerHeader />
+      <div className="h-12" /> {/* Spacer for fixed header */}
       {/* Hero Section */}
       <header className="w-full aspect-square md:aspect-video md:h-[60vh] relative flex items-center justify-center overflow-hidden bg-zinc-900">
         <motion.div 
@@ -260,8 +254,16 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
 
         {/* Section 2: Peek at Me */}
         <InteractivePeekSection 
-          onFeedbackUpdate={(index, rating, comment) => {
+          onFeedbackUpdate={async (index, rating, comment) => {
             setPeekFeedback(prev => ({ ...prev, [index]: { rating, comment } }));
+            // Award 53 points for rating
+            if (rating > 0 && user) {
+              await supabase.from('user_points').insert({
+                user_id: user.id,
+                points: 53,
+                reason: `تقييم المقطع ${index + 1}`,
+              }).then(() => {});
+            }
           }}
         />
 
@@ -440,9 +442,16 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
 
                         if (subError) throw subError;
 
+                        // Award 53 points for interaction
+                        await supabase.from('user_points').insert({
+                          user_id: user!.id,
+                          points: 53,
+                          reason: 'تفاعل وتواصل',
+                        });
+
                         // Open Telegram
                         window.open(getTelegramUrl(), '_blank');
-                        showToast('تم حفظ بياناتك بنجاح!', 'success');
+                        showToast('تم حفظ بياناتك بنجاح! +53 نقطة ذهبية 🪙', 'success');
                         setTimeout(() => setIsContactModalOpen(false), 100);
                       } catch (err) {
                         console.error(err);
