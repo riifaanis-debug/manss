@@ -153,7 +153,7 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col items-center justify-start px-4 pt-24 pb-8" dir="rtl">
+    <div className="min-h-screen relative flex flex-col items-center justify-start px-4 pt-36 pb-8" dir="rtl">
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center"
@@ -166,7 +166,7 @@ function LoginPage() {
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="relative z-10 w-full max-w-sm"
+        className="relative z-10 w-full max-w-[280px]"
       >
         {/* Icon + heading */}
         <div className="flex flex-col items-center mb-6">
@@ -174,19 +174,19 @@ function LoginPage() {
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-xl border-2 border-sky-400/60 flex items-center justify-center mb-4 shadow-xl shadow-sky-500/30"
+            className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-xl border-2 border-sky-400/60 flex items-center justify-center mb-3 shadow-xl shadow-sky-500/30"
           >
-            {loginMode === "admin" ? <Shield className="w-10 h-10 text-white" /> : isSignUp ? <UserPlus className="w-10 h-10 text-white" /> : <LogIn className="w-10 h-10 text-white" />}
+            {loginMode === "admin" ? <Shield className="w-8 h-8 text-white" /> : isSignUp ? <UserPlus className="w-8 h-8 text-white" /> : <LogIn className="w-8 h-8 text-white" />}
           </motion.div>
-          <h1 className="text-2xl font-bold text-white mb-1 drop-shadow-lg">
+          <h1 className="text-xl font-bold text-white mb-1 drop-shadow-lg">
             {loginMode === "admin" ? "دخول الإدارة" : isSignUp ? "إنشاء حساب جديد" : "تسجيل الدخول"}
           </h1>
-          <p className="text-zinc-200 text-sm drop-shadow">
+          <p className="text-zinc-200 text-xs drop-shadow">
             {loginMode === "admin" ? "لوحة تحكم المسؤول" : isSignUp ? "أنشئ حسابك للمتابعة" : "لمتابعة فعاليات منصور"}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-black/45 backdrop-blur-2xl border border-white/15 rounded-2xl p-6 shadow-2xl space-y-4">
+        <form onSubmit={handleSubmit} className="bg-black/45 backdrop-blur-2xl border border-white/15 rounded-2xl p-4 shadow-2xl space-y-3">
           {error && (
             <div className="flex items-center gap-2 text-red-300 text-xs bg-red-500/15 border border-red-500/30 rounded-xl p-3">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -210,7 +210,7 @@ function LoginPage() {
               placeholder="example@email.com"
               required
               dir="ltr"
-              className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-sky-400/60 focus:border-sky-400/60 backdrop-blur-md"
+              className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white text-xs placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-sky-400/60 focus:border-sky-400/60 backdrop-blur-md"
             />
           </div>
 
@@ -227,7 +227,7 @@ function LoginPage() {
                 required
                 minLength={1}
                 dir="ltr"
-                className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-sky-400/60 focus:border-sky-400/60 backdrop-blur-md pr-12"
+                className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white text-xs placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-sky-400/60 focus:border-sky-400/60 backdrop-blur-md pr-10"
               />
               <button
                 type="button"
@@ -252,7 +252,7 @@ function LoginPage() {
                 required
                 minLength={1}
                 dir="ltr"
-                className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-sky-400/60 focus:border-sky-400/60 backdrop-blur-md"
+                className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white text-xs placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-sky-400/60 focus:border-sky-400/60 backdrop-blur-md"
               />
             </div>
           )}
@@ -260,7 +260,7 @@ function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full font-bold rounded-xl py-3 transition-all shadow-lg disabled:opacity-50 ${
+            className={`w-full font-bold text-sm rounded-lg py-2.5 transition-all shadow-lg disabled:opacity-50 ${
               loginMode === "admin"
                 ? "bg-gradient-to-l from-violet-500 to-indigo-600 text-white hover:from-violet-400 hover:to-indigo-500 shadow-indigo-600/30"
                 : "bg-gradient-to-l from-sky-500 to-blue-600 text-white hover:from-sky-400 hover:to-blue-500 shadow-blue-600/30"
