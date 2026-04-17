@@ -186,32 +186,6 @@ function LoginPage() {
           </p>
         </div>
 
-        {/* Toggle Tabs */}
-        <div className="flex mb-4 bg-black/40 backdrop-blur-xl border border-white/15 rounded-xl p-1">
-          <button
-            type="button"
-            onClick={() => { setLoginMode("customer"); setIsSignUp(false); setError(""); setSuccessMessage(""); }}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
-              loginMode === "customer"
-                ? "bg-gradient-to-l from-sky-500 to-blue-600 text-white shadow-lg"
-                : "text-zinc-300 hover:text-white"
-            }`}
-          >
-            عميل
-          </button>
-          <button
-            type="button"
-            onClick={() => { setLoginMode("admin"); setIsSignUp(false); setError(""); setSuccessMessage(""); }}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
-              loginMode === "admin"
-                ? "bg-gradient-to-l from-violet-500 to-indigo-600 text-white shadow-lg"
-                : "text-zinc-300 hover:text-white"
-            }`}
-          >
-            إدارة
-          </button>
-        </div>
-
         <form onSubmit={handleSubmit} className="bg-black/45 backdrop-blur-2xl border border-white/15 rounded-2xl p-6 shadow-2xl space-y-4">
           {error && (
             <div className="flex items-center gap-2 text-red-300 text-xs bg-red-500/15 border border-red-500/30 rounded-xl p-3">
@@ -307,6 +281,32 @@ function LoginPage() {
             </div>
           )}
         </form>
+
+        {/* Small mode toggle below the form */}
+        <div className="mt-4 flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => { setLoginMode("customer"); setIsSignUp(false); setError(""); setSuccessMessage(""); }}
+            className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all backdrop-blur-md border ${
+              loginMode === "customer"
+                ? "bg-gradient-to-l from-sky-500 to-blue-600 text-white border-transparent shadow-md shadow-blue-600/30"
+                : "bg-black/40 text-zinc-300 border-white/15 hover:text-white"
+            }`}
+          >
+            عميل
+          </button>
+          <button
+            type="button"
+            onClick={() => { setLoginMode("admin"); setIsSignUp(false); setError(""); setSuccessMessage(""); }}
+            className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all backdrop-blur-md border ${
+              loginMode === "admin"
+                ? "bg-gradient-to-l from-violet-500 to-indigo-600 text-white border-transparent shadow-md shadow-indigo-600/30"
+                : "bg-black/40 text-zinc-300 border-white/15 hover:text-white"
+            }`}
+          >
+            إدارة
+          </button>
+        </div>
       </motion.div>
 
       {/* Profile Dialog */}
