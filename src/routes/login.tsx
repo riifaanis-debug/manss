@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Mail, Lock, LogIn, UserPlus, AlertCircle, Eye, EyeOff, Shield, ChevronDown, Save } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import loginBg from "@/assets/login-bg.jpeg";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
