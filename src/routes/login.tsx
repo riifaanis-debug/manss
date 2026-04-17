@@ -182,7 +182,7 @@ function LoginPage() {
             {loginMode === "admin" ? "دخول الإدارة" : isSignUp ? "إنشاء حساب جديد" : "تسجيل الدخول"}
           </h1>
           <p className="text-zinc-200 text-sm drop-shadow">
-            {loginMode === "admin" ? "لوحة تحكم المسؤول" : isSignUp ? "أنشئ حسابك للمتابعة" : "أدخل بياناتك للدخول"}
+            {loginMode === "admin" ? "لوحة تحكم المسؤول" : isSignUp ? "أنشئ حسابك للمتابعة" : "لمتابعة فعاليات منصور"}
           </p>
         </div>
 
