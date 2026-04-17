@@ -153,7 +153,7 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col items-center justify-center px-4 py-8" dir="rtl">
+    <div className="min-h-screen relative flex flex-col items-center justify-start px-4 pt-24 pb-8" dir="rtl">
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center"
