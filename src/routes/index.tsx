@@ -699,13 +699,13 @@ function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index
   );
 }
 
-function ProfileItem({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+function ProfileItem({ icon, label, value }: { icon: ReactNode; label: string; value: ReactNode }) {
   return (
     <div className="flex items-center gap-3 md:gap-4">
       <div className="flex-shrink-0">{icon}</div>
       <div>
         <p className="text-[10px] md:text-xs font-bold text-zinc-400 uppercase tracking-wider mb-0.5">{label}</p>
-        <p className="text-base md:text-lg font-medium text-zinc-800 leading-tight">{value}</p>
+        <div className="text-base md:text-lg font-medium text-zinc-800 leading-tight">{value}</div>
       </div>
     </div>
   );
