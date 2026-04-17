@@ -159,7 +159,7 @@ function LoginPage() {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${loginBg})` }}
       />
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/20" />
 
       {/* Content */}
       <motion.div
