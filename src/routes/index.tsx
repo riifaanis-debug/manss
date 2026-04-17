@@ -228,7 +228,7 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
             <div className="space-y-4 md:space-y-6">
               <ProfileItem icon={<div className="p-2 bg-blue-50 rounded-xl text-blue-600"><User size={18} /></div>} label="الاسم" value="منصور" />
-              <ProfileItem icon={<div className="p-2 bg-emerald-50 rounded-xl text-emerald-600"><MapPin size={18} /></div>} label="الموقع" value="من الدمام / وزائر جده - حي التيسير" />
+              <ProfileItem icon={<div className="p-2 bg-emerald-50 rounded-xl text-emerald-600"><MapPin size={18} /></div>} label="الموقع" value={<div className="space-y-1"><div>من الدمام / وزائر الطائف - حي الوسام (3)</div><div className="text-sm text-zinc-600">للشقق الفندقية Bee House</div><a href="https://maps.app.goo.gl/9EJ7sBtd3Z41inh48?g_st=ic" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-emerald-600 hover:text-emerald-700 underline">انقر هنا للوصول للموقع</a></div>} />
               <ProfileItem icon={<div className="p-2 bg-amber-50 rounded-xl text-amber-600"><Calendar size={18} /></div>} label="العمر" value="24 سنة" />
             </div>
             <div className="space-y-4 md:space-y-6">
