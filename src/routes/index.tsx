@@ -254,6 +254,8 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
 
         {/* Section 2: Peek at Me */}
         <InteractivePeekSection 
+          user={user}
+          showToast={showToast}
           onFeedbackUpdate={async (index, rating, comment) => {
             setPeekFeedback(prev => ({ ...prev, [index]: { rating, comment } }));
             // Award 53 points for rating
