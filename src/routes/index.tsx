@@ -628,24 +628,44 @@ function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index
             className={`w-full h-full object-cover ${videoState === 'playing' ? 'opacity-100' : 'opacity-40'}`}
           />
 
-          {videoState === 'idle' && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
-              <button onClick={handlePlay} className="group flex flex-col items-center gap-3 transition-transform active:scale-95">
-                <div className="w-16 h-16 bg-white text-zinc-900 rounded-full flex items-center justify-center shadow-2xl group-hover:bg-amber-400 transition-colors">
-                  <Play size={28} fill="currentColor" className="ml-1" />
-                </div>
-                <span className="text-sm font-bold tracking-wide">المس هنا لتشاهد</span>
-              </button>
-            </div>
-          )}
+        <div className={
+          videoState === 'playing'
+            ? 'fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-2xl p-4'
+            : 'relative aspect-video bg-black rounded-xl md:rounded-2xl overflow-hidden shadow-2xl border border-white/5 -mx-4 md:mx-0'
+        }>
+          <div className={
+            videoState === 'playing'
+              ? 'relative w-full max-w-4xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10'
+              : 'contents'
+          }>
+            <video 
+              key={currentIndex}
+              ref={videoRef}
+              src={PEEK_VIDEOS[currentIndex]}
+              onEnded={handleEnded}
+              playsInline
+              className={`w-full h-full object-cover ${videoState === 'playing' ? 'opacity-100' : 'opacity-40'}`}
+            />
 
-          {videoState === 'playing' && (
-            <div className="absolute top-4 right-4">
-              <div className="px-2 py-1 bg-black/50 backdrop-blur-md rounded text-[10px] font-bold uppercase tracking-widest text-white/80 border border-white/10">
-                Live Preview
+            {videoState === 'idle' && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+                <button onClick={handlePlay} className="group flex flex-col items-center gap-3 transition-transform active:scale-95">
+                  <div className="w-16 h-16 bg-white text-zinc-900 rounded-full flex items-center justify-center shadow-2xl group-hover:bg-amber-400 transition-colors">
+                    <Play size={28} fill="currentColor" className="ml-1" />
+                  </div>
+                  <span className="text-sm font-bold tracking-wide">المس هنا لتشاهد</span>
+                </button>
               </div>
-            </div>
-          )}
+            )}
+
+            {videoState === 'playing' && (
+              <div className="absolute top-4 right-4">
+                <div className="px-2 py-1 bg-black/50 backdrop-blur-md rounded text-[10px] font-bold uppercase tracking-widest text-white/80 border border-white/10">
+                  Live Preview
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <AnimatePresence mode="wait">
