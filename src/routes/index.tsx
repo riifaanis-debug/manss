@@ -611,7 +611,7 @@ function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index
             <div className="p-2 bg-white/10 rounded-xl backdrop-blur-sm">
               <Camera size={20} className="text-amber-400" />
             </div>
-            <h2 className="text-xl font-bold">نظرة خاطفة عني</h2>
+            <h2 className="text-sm font-bold">نظرة خاطفة عني</h2>
           </div>
           <div className="text-xs font-mono text-zinc-500 bg-white/5 px-2 py-1 rounded">
             {currentIndex + 1} / {PEEK_VIDEOS.length}
