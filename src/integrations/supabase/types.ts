@@ -227,6 +227,36 @@ export type Database = {
         }
         Relationships: []
       }
+      video_unlock_requests: {
+        Row: {
+          created_at: string
+          id: string
+          proof_video_url: string
+          reviewed_at: string | null
+          status: string
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          proof_video_url: string
+          reviewed_at?: string | null
+          status?: string
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          proof_video_url?: string
+          reviewed_at?: string | null
+          status?: string
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
