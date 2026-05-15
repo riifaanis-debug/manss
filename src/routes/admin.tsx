@@ -174,6 +174,7 @@ function AdminPage() {
           {activeTab === "customers" && <AdminCustomerData />}
           {activeTab === "feedback" && <AdminCustomerFeedback />}
           {activeTab === "media" && <AdminCustomerMedia />}
+          {activeTab === "unlocks" && <AdminUnlockRequests />}
           {activeTab === "points" && <AdminPoints />}
           {activeTab === "chat" && <AdminChat />}
           {activeTab === "notifications" && <AdminNotifications />}
