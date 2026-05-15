@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Shield, LogOut, Menu, X, Users, MessageCircle, Image, Coins, Bell } from "lucide-react";
+import { Shield, LogOut, Menu, X, Users, MessageCircle, Image, Coins, Bell, Unlock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { AdminCustomerData } from "@/components/admin/AdminCustomerData";
 import { AdminCustomerFeedback } from "@/components/admin/AdminCustomerFeedback";
@@ -9,6 +9,7 @@ import { AdminCustomerMedia } from "@/components/admin/AdminCustomerMedia";
 import { AdminPoints } from "@/components/admin/AdminPoints";
 import { AdminChat } from "@/components/admin/AdminChat";
 import { AdminNotifications } from "@/components/admin/AdminNotifications";
+import { AdminUnlockRequests } from "@/components/admin/AdminUnlockRequests";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -22,12 +23,13 @@ export const Route = createFileRoute("/admin")({
   }),
 });
 
-type AdminTab = "customers" | "feedback" | "media" | "points" | "chat" | "notifications";
+type AdminTab = "customers" | "feedback" | "media" | "points" | "chat" | "notifications" | "unlocks";
 
 const TABS: { id: AdminTab; label: string; icon: typeof Users }[] = [
   { id: "customers", label: "بيانات العملاء", icon: Users },
   { id: "feedback", label: "ردود العملاء", icon: MessageCircle },
   { id: "media", label: "صور ومقاطع العملاء", icon: Image },
+  { id: "unlocks", label: "طلبات فتح المشاهدات", icon: Unlock },
   { id: "points", label: "النقاط", icon: Coins },
   { id: "chat", label: "المحادثات", icon: MessageCircle },
   { id: "notifications", label: "الإشعارات", icon: Bell },
@@ -172,6 +174,7 @@ function AdminPage() {
           {activeTab === "customers" && <AdminCustomerData />}
           {activeTab === "feedback" && <AdminCustomerFeedback />}
           {activeTab === "media" && <AdminCustomerMedia />}
+          {activeTab === "unlocks" && <AdminUnlockRequests />}
           {activeTab === "points" && <AdminPoints />}
           {activeTab === "chat" && <AdminChat />}
           {activeTab === "notifications" && <AdminNotifications />}

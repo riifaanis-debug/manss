@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Search } from "lucide-react";
+import { Users, Search, Copy, Check } from "lucide-react";
 
 interface Submission {
   id: string;
@@ -28,6 +28,7 @@ export function AdminCustomerData() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
   const [search, setSearch] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -57,6 +58,44 @@ export function AdminCustomerData() {
       (profiles[s.user_id] || "").includes(search)
   );
 
+  const buildText = (sub: Submission) => {
+    const lines = [
+      `البريد: ${profiles[sub.user_id] || "-"}`,
+      `الاسم: ${sub.name}`,
+      `العمر: ${sub.age}`,
+      `النوع/الميول: ${sub.orientation}`,
+      `المدينة: ${sub.city}`,
+      `الحي: ${sub.district}`,
+      `الطول: ${sub.height || "-"}`,
+      `الوزن: ${sub.weight || "-"}`,
+      `مظهر الجسم: ${sub.body_appearance || "-"}`,
+      `حجمه: ${sub.his_size || "-"}`,
+      `حجمها: ${sub.her_size || "-"}`,
+      `سناب شات: ${sub.snapchat}`,
+      `تاريخ التسجيل: ${new Date(sub.created_at).toLocaleString("ar")}`,
+    ];
+    return lines.join("\n");
+  };
+
+  const copyCard = async (sub: Submission) => {
+    try {
+      await navigator.clipboard.writeText(buildText(sub));
+      setCopiedId(sub.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const Field = ({ label, value, accent }: { label: string; value: string; accent?: boolean }) => (
+    <div className="flex items-start justify-between gap-3 py-2 border-b border-zinc-800/50 last:border-0">
+      <span className="text-[11px] text-zinc-500 font-medium shrink-0">{label}</span>
+      <span className={`text-sm ${accent ? "text-violet-400" : "text-zinc-100"} text-left break-all`}>
+        {value || "-"}
+      </span>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 mb-4">
@@ -64,6 +103,7 @@ export function AdminCustomerData() {
           <Users className="w-5 h-5 text-blue-400" />
         </div>
         <h2 className="text-lg font-bold">بيانات العملاء</h2>
+        <span className="ml-auto text-xs text-zinc-500">{filtered.length} عميل</span>
       </div>
 
       <div className="relative">
@@ -77,51 +117,54 @@ export function AdminCustomerData() {
         />
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-zinc-800">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-zinc-800/50 text-zinc-400 text-xs">
-              <th className="p-3 text-right">البريد</th>
-              <th className="p-3 text-right">النوع</th>
-              <th className="p-3 text-right">الاسم</th>
-              <th className="p-3 text-right">العمر</th>
-              <th className="p-3 text-right">المدينة</th>
-              <th className="p-3 text-right">الحي</th>
-              <th className="p-3 text-right">الطول</th>
-              <th className="p-3 text-right">الوزن</th>
-              <th className="p-3 text-right">مظهر الجسم</th>
-              <th className="p-3 text-right">حجمه</th>
-              <th className="p-3 text-right">حجمها</th>
-              <th className="p-3 text-right">سناب شات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 ? (
-              <tr>
-                <td colSpan={12} className="p-8 text-center text-zinc-500">
-                  لا توجد بيانات
-                </td>
-              </tr>
-            ) : (
-              filtered.map((sub) => (
-                <tr key={sub.id} className="border-t border-zinc-800 hover:bg-zinc-800/30 transition-colors">
-                  <td className="p-3 text-zinc-300">{profiles[sub.user_id] || "-"}</td>
-                  <td className="p-3">{sub.orientation}</td>
-                  <td className="p-3 font-medium">{sub.name}</td>
-                  <td className="p-3">{sub.age}</td>
-                  <td className="p-3">{sub.city}</td>
-                  <td className="p-3">{sub.district}</td>
-                  <td className="p-3">{sub.height || "-"}</td>
-                  <td className="p-3">{sub.weight || "-"}</td>
-                  <td className="p-3">{sub.body_appearance || "-"}</td>
-                  <td className="p-3">{sub.his_size || "-"}</td>
-                  <td className="p-3">{sub.her_size || "-"}</td>
-                  <td className="p-3 text-violet-400">{sub.snapchat}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      <div className="space-y-3">
+        {filtered.length === 0 ? (
+          <div className="p-10 text-center text-zinc-500 bg-zinc-900/40 rounded-xl border border-zinc-800">
+            لا توجد بيانات
+          </div>
+        ) : (
+          filtered.map((sub) => (
+            <div
+              key={sub.id}
+              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 space-y-1 hover:border-violet-600/40 transition-colors"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h3 className="text-base font-bold text-white">{sub.name}</h3>
+                  <p className="text-[11px] text-zinc-500 mt-0.5">
+                    {new Date(sub.created_at).toLocaleString("ar")}
+                  </p>
+                </div>
+                <button
+                  onClick={() => copyCard(sub)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    copiedId === sub.id
+                      ? "bg-emerald-500/20 text-emerald-400"
+                      : "bg-violet-500/15 text-violet-300 hover:bg-violet-500/25"
+                  }`}
+                >
+                  {copiedId === sub.id ? (
+                    <><Check className="w-3.5 h-3.5" /> تم النسخ</>
+                  ) : (
+                    <><Copy className="w-3.5 h-3.5" /> نسخ البيانات</>
+                  )}
+                </button>
+              </div>
+
+              <Field label="البريد" value={profiles[sub.user_id] || "-"} />
+              <Field label="العمر" value={sub.age} />
+              <Field label="النوع / الميول" value={sub.orientation} />
+              <Field label="المدينة" value={sub.city} />
+              <Field label="الحي" value={sub.district} />
+              <Field label="الطول" value={sub.height || "-"} />
+              <Field label="الوزن" value={sub.weight || "-"} />
+              <Field label="مظهر الجسم" value={sub.body_appearance || "-"} />
+              <Field label="حجمه" value={sub.his_size || "-"} />
+              <Field label="حجمها" value={sub.her_size || "-"} />
+              <Field label="سناب شات" value={sub.snapchat} accent />
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

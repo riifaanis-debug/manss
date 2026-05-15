@@ -254,6 +254,8 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
 
         {/* Section 2: Peek at Me */}
         <InteractivePeekSection 
+          user={user}
+          showToast={showToast}
           onFeedbackUpdate={async (index, rating, comment) => {
             setPeekFeedback(prev => ({ ...prev, [index]: { rating, comment } }));
             // Award 53 points for rating
@@ -311,9 +313,9 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
 
             <div className="text-center">
               <p className="font-bold text-zinc-800 text-sm mb-0.5">رسالة صوتية من منصور</p>
-              <div className="flex items-center justify-center gap-2 text-zinc-400 text-[10px]">
+              <div className="mt-1 inline-flex items-center gap-2 px-3 py-1.5 bg-rose-50 text-rose-600 rounded-full text-[11px] font-bold animate-pulse">
                 <Volume2 size={12} />
-                <span>اضغط للتشغيل فوراً</span>
+                <span>👆 اضغط هنا لسماع صوتي</span>
               </div>
             </div>
 
@@ -547,12 +549,54 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
   );
 }
 
-function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index: number, rating: number, comment: string) => void }) {
+function InteractivePeekSection({ user, showToast, onFeedbackUpdate }: { 
+  user: any;
+  showToast: (m: string, t?: 'success' | 'error') => void;
+  onFeedbackUpdate: (index: number, rating: number, comment: string) => void;
+}) {
+  const VIDEO_LIMIT_INDEX = 4; // After 5th video (index 4), require unlock to continue
   const [currentIndex, setCurrentIndex] = useState(0);
   const [videoState, setVideoState] = useState<'idle' | 'playing' | 'feedback'>('idle');
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [uploadingProof, setUploadingProof] = useState(false);
+  const [unlockStatus, setUnlockStatus] = useState<'none' | 'pending' | 'approved' | 'rejected'>('none');
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Check existing unlock status & subscribe
+  useEffect(() => {
+    if (!user) return;
+    const fetchStatus = async () => {
+      const { data } = await supabase
+        .from('video_unlock_requests')
+        .select('status')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (data?.status === 'approved') setUnlockStatus('approved');
+      else if (data?.status === 'pending') setUnlockStatus('pending');
+      else if (data?.status === 'rejected') setUnlockStatus('rejected');
+    };
+    fetchStatus();
+    const channel = supabase.channel(`unlock-${user.id}`)
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'video_unlock_requests',
+        filter: `user_id=eq.${user.id}`,
+      }, (payload: any) => {
+        const s = payload.new?.status;
+        if (s === 'approved') {
+          setUnlockStatus('approved');
+          setShowLimitModal(false);
+          showToast('تم منحك صلاحية المتابعة 🎉', 'success');
+        } else if (s === 'pending') setUnlockStatus('pending');
+        else if (s === 'rejected') setUnlockStatus('rejected');
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, showToast]);
 
   const handlePlay = () => {
     setVideoState('playing');
@@ -580,18 +624,74 @@ function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index
     const val = e.target.value;
     setComment(val);
     onFeedbackUpdate(currentIndex, rating, val);
-    const isPositive = POSITIVE_KEYWORDS.some(keyword => val.includes(keyword));
-    if (isPositive && currentIndex < PEEK_VIDEOS.length - 1) {
-      setTimeout(() => handleNext(), 1000);
-    }
   };
 
   const handleNext = () => {
+    if (rating === 0) {
+      showToast('يجب اختيار التقييم أولاً', 'error');
+      return;
+    }
+    if (comment.trim() === '') {
+      showToast('يجب كتابة شعورك قبل المتابعة', 'error');
+      return;
+    }
+    // Gate at 5th video
+    if (currentIndex === VIDEO_LIMIT_INDEX && unlockStatus !== 'approved') {
+      setShowLimitModal(true);
+      return;
+    }
     if (currentIndex < PEEK_VIDEOS.length - 1) {
       setCurrentIndex(prev => prev + 1);
       setVideoState('idle');
       setRating(0);
       setComment('');
+    }
+  };
+
+  const handleProofUpload = async () => {
+    if (!proofFile || !user) return;
+    setUploadingProof(true);
+    try {
+      const ext = proofFile.name.split('.').pop();
+      const path = `${user.id}/unlock-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('customer-media').upload(path, proofFile);
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from('customer-media').getPublicUrl(path);
+
+      const { data: sub } = await supabase
+        .from('submissions').select('name').eq('user_id', user.id).limit(1).maybeSingle();
+      const userName = sub?.name || user.email || 'مجهول';
+
+      await supabase.from('video_unlock_requests').insert({
+        user_id: user.id,
+        user_name: userName,
+        proof_video_url: urlData.publicUrl,
+        status: 'pending',
+      });
+
+      // Notify all admins
+      const { data: admins } = await supabase
+        .from('user_roles').select('user_id').eq('role', 'admin');
+      if (admins && admins.length > 0) {
+        await supabase.from('notifications').insert(
+          admins.map((a: any) => ({
+            user_id: a.user_id,
+            title: '🔓 طلب فتح مشاهدات جديد',
+            body: `${userName} أرفق فيديو إثبات للمتابعة`,
+            type: 'unlock_request',
+          }))
+        );
+      }
+
+      setUnlockStatus('pending');
+      setProofFile(null);
+      showToast('تم إرسال طلبك للإدارة. انتظر الموافقة', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('حدث خطأ أثناء الرفع', 'error');
+    } finally {
+      setUploadingProof(false);
     }
   };
 
@@ -606,7 +706,7 @@ function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index
       <div className="absolute bottom-0 left-0 w-48 h-48 bg-rose-500/10 blur-3xl rounded-full -ml-24 -mb-24" />
       
       <div className="relative z-10">
-        <div className="flex items-center justify-between mb-6 px-2 md:px-0">
+        <div className="flex items-center justify-between mb-3 px-2 md:px-0">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-white/10 rounded-xl backdrop-blur-sm">
               <Camera size={20} className="text-amber-400" />
@@ -616,6 +716,12 @@ function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index
           <div className="text-xs font-mono text-zinc-500 bg-white/5 px-2 py-1 rounded">
             {currentIndex + 1} / {PEEK_VIDEOS.length}
           </div>
+        </div>
+
+        <div className="mb-4 text-center">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500/15 text-amber-300 rounded-full text-xs font-bold animate-pulse">
+            👆 اضغط هنا لمشاهدتي
+          </span>
         </div>
 
         <div className={
@@ -643,7 +749,7 @@ function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index
                   <div className="w-16 h-16 bg-white text-zinc-900 rounded-full flex items-center justify-center shadow-2xl group-hover:bg-amber-400 transition-colors">
                     <Play size={28} fill="currentColor" className="ml-1" />
                   </div>
-                  <span className="text-sm font-bold tracking-wide">المس هنا لتشاهد</span>
+                  <span className="text-sm font-bold tracking-wide">اضغط هنا لمشاهدتي</span>
                 </button>
               </div>
             )}
@@ -667,7 +773,9 @@ function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index
               className="mt-8 space-y-6"
             >
               <div className="space-y-3">
-                <p className="text-sm font-medium text-zinc-400 text-center">ما هو تقييمك لهذا المقطع؟</p>
+                <p className="text-sm font-medium text-zinc-400 text-center">
+                  ما هو تقييمك لهذا المقطع؟ <span className="text-rose-500">*</span>
+                </p>
                 <div className="flex items-center justify-between gap-1 max-w-sm mx-auto">
                   {[...Array(10)].map((_, i) => (
                     <button
@@ -686,10 +794,11 @@ function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index
               </div>
 
               <div className="space-y-3">
-                <p className="text-sm font-medium text-zinc-400 text-right">عبر عن شعورك الداخلي تجاه ما شاهدت</p>
+                <p className="text-sm font-medium text-zinc-400 text-right">
+                  عبر عن شعورك الداخلي تجاه ما شاهدت <span className="text-rose-500">*</span>
+                </p>
                 <p className="text-[11px] text-rose-500 text-right font-medium leading-relaxed">
-                  ملاحظة : هذه الخاصية تستخدم الذكائي الاصطناعي العاطفي 
-                  في حال كان النص المكتوب يعبر عن احساس ومشاعر وانجذاب ورغبه صادقه ، سيحلل النظام ذلك وسوف يسمح لك بمشاهذته فديو اخر
+                  ملاحظة : التقييم والكتابة إلزاميان للانتقال للمقطع التالي.
                 </p>
                 <textarea 
                   value={comment}
@@ -703,9 +812,9 @@ function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index
               <div className="flex justify-center">
                 <button 
                   onClick={handleNext}
-                  className="px-6 py-2.5 bg-white text-zinc-900 rounded-xl font-bold text-sm hover:bg-zinc-100 transition-all flex items-center gap-2"
+                  className="px-6 py-2.5 bg-white text-zinc-900 rounded-xl font-bold text-sm hover:bg-zinc-100 transition-all flex items-center gap-2 disabled:opacity-50"
                 >
-                  قيم شعورك تجاه طيزه
+                  المقطع التالي
                   <ChevronLeft size={16} />
                 </button>
               </div>
@@ -713,6 +822,74 @@ function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index
           )}
         </AnimatePresence>
       </div>
+
+      {/* Limit reached modal */}
+      <AnimatePresence>
+        {showLimitModal && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
+              className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl text-zinc-800 relative"
+              dir="rtl"
+            >
+              <button onClick={() => setShowLimitModal(false)}
+                className="absolute top-4 left-4 p-2 bg-zinc-100 rounded-full text-zinc-500 hover:bg-zinc-200">
+                <X size={18} />
+              </button>
+              <div className="text-center mb-5">
+                <div className="mx-auto w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center mb-3">
+                  <AlertCircle className="text-rose-500" size={28} />
+                </div>
+                <h3 className="text-lg font-bold mb-1">وصلت الحد الأعلى من المشاهدات</h3>
+                <p className="text-sm text-zinc-500 leading-relaxed">
+                  لتتمكن من المتابعة، الرجاء إرفاق فيديو لمدة 5 ثوانٍ يوضح أنك شاهدت المقاطع الخمسة السابقة. سيتم إرسال طلبك للإدارة للموافقة.
+                </p>
+              </div>
+
+              {unlockStatus === 'pending' ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+                  <p className="text-sm font-bold text-amber-700">⏳ طلبك قيد المراجعة</p>
+                  <p className="text-xs text-amber-600 mt-1">سيتم إعلامك فور الموافقة</p>
+                </div>
+              ) : unlockStatus === 'rejected' ? (
+                <div className="space-y-3">
+                  <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 text-center text-sm text-rose-700">
+                    تم رفض طلبك السابق. يمكنك إرفاق فيديو جديد.
+                  </div>
+                </div>
+              ) : null}
+
+              {unlockStatus !== 'pending' && (
+                <div className="space-y-3">
+                  <div className="relative group">
+                    <input
+                      type="file" accept="video/*"
+                      onChange={(e) => setProofFile(e.target.files?.[0] || null)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    <div className="w-full px-4 py-3 bg-zinc-50 border-2 border-dashed border-zinc-300 rounded-xl flex items-center justify-between group-hover:border-rose-400 transition-all">
+                      <span className="text-xs text-zinc-500 truncate max-w-[80%]">
+                        {proofFile ? proofFile.name : "ارفق فيديو 5 ثوانٍ..."}
+                      </span>
+                      <Upload size={18} className="text-zinc-400" />
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleProofUpload}
+                    disabled={!proofFile || uploadingProof}
+                    className="w-full py-3 bg-zinc-900 text-white rounded-xl font-bold text-sm disabled:opacity-50"
+                  >
+                    {uploadingProof ? "جاري الرفع..." : "إرسال للإدارة"}
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.section>
   );
 }
