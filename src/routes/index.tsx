@@ -563,6 +563,14 @@ function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index
 
   const handleEnded = () => setVideoState('feedback');
 
+  useEffect(() => {
+    if (videoState === 'playing') {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [videoState]);
+
   const handleRatingClick = (val: number) => {
     setRating(val);
     onFeedbackUpdate(currentIndex, val, comment);
