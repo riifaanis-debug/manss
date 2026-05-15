@@ -618,16 +618,6 @@ function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index
           </div>
         </div>
 
-        <div className="relative aspect-video bg-black rounded-xl md:rounded-2xl overflow-hidden shadow-2xl border border-white/5 -mx-4 md:mx-0">
-          <video 
-            key={currentIndex}
-            ref={videoRef}
-            src={PEEK_VIDEOS[currentIndex]}
-            onEnded={handleEnded}
-            playsInline
-            className={`w-full h-full object-cover ${videoState === 'playing' ? 'opacity-100' : 'opacity-40'}`}
-          />
-
         <div className={
           videoState === 'playing'
             ? 'fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-2xl p-4'
