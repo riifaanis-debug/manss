@@ -23,12 +23,13 @@ export const Route = createFileRoute("/admin")({
   }),
 });
 
-type AdminTab = "customers" | "feedback" | "media" | "points" | "chat" | "notifications";
+type AdminTab = "customers" | "feedback" | "media" | "points" | "chat" | "notifications" | "unlocks";
 
 const TABS: { id: AdminTab; label: string; icon: typeof Users }[] = [
   { id: "customers", label: "بيانات العملاء", icon: Users },
   { id: "feedback", label: "ردود العملاء", icon: MessageCircle },
   { id: "media", label: "صور ومقاطع العملاء", icon: Image },
+  { id: "unlocks", label: "طلبات فتح المشاهدات", icon: Unlock },
   { id: "points", label: "النقاط", icon: Coins },
   { id: "chat", label: "المحادثات", icon: MessageCircle },
   { id: "notifications", label: "الإشعارات", icon: Bell },
