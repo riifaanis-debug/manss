@@ -705,7 +705,7 @@ function InteractivePeekSection({ onFeedbackUpdate }: { onFeedbackUpdate: (index
                   onClick={handleNext}
                   className="px-6 py-2.5 bg-white text-zinc-900 rounded-xl font-bold text-sm hover:bg-zinc-100 transition-all flex items-center gap-2"
                 >
-                  قيم شعوري تجاه طيزه
+                  قيم شعورك تجاه طيزه
                   <ChevronLeft size={16} />
                 </button>
               </div>
