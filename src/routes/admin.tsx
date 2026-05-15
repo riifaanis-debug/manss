@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Shield, LogOut, Menu, X, Users, MessageCircle, Image, Coins, Bell } from "lucide-react";
+import { Shield, LogOut, Menu, X, Users, MessageCircle, Image, Coins, Bell, Unlock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { AdminCustomerData } from "@/components/admin/AdminCustomerData";
 import { AdminCustomerFeedback } from "@/components/admin/AdminCustomerFeedback";
@@ -9,6 +9,7 @@ import { AdminCustomerMedia } from "@/components/admin/AdminCustomerMedia";
 import { AdminPoints } from "@/components/admin/AdminPoints";
 import { AdminChat } from "@/components/admin/AdminChat";
 import { AdminNotifications } from "@/components/admin/AdminNotifications";
+import { AdminUnlockRequests } from "@/components/admin/AdminUnlockRequests";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { supabase } from "@/integrations/supabase/client";
 
