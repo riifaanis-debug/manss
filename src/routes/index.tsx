@@ -313,9 +313,9 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
 
             <div className="text-center">
               <p className="font-bold text-zinc-800 text-sm mb-0.5">رسالة صوتية من منصور</p>
-              <div className="flex items-center justify-center gap-2 text-zinc-400 text-[10px]">
+              <div className="mt-1 inline-flex items-center gap-2 px-3 py-1.5 bg-rose-50 text-rose-600 rounded-full text-[11px] font-bold animate-pulse">
                 <Volume2 size={12} />
-                <span>اضغط للتشغيل فوراً</span>
+                <span>👆 اضغط هنا لسماع صوتي</span>
               </div>
             </div>
 
