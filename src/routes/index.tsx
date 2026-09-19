@@ -81,6 +81,7 @@ function Index() {
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [peekFeedback, setPeekFeedback] = useState<Record<number, { rating: number; comment: string }>>({});
+  const [peekPlaying, setPeekPlaying] = useState(false);
 
   const toggleAudio = () => {
     if (audioRef.current) {
@@ -228,7 +229,7 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
             <div className="space-y-4 md:space-y-6">
               <ProfileItem icon={<div className="p-2 bg-blue-50 rounded-xl text-blue-600"><User size={18} /></div>} label="الاسم" value="منصور" />
-              <ProfileItem icon={<div className="p-2 bg-emerald-50 rounded-xl text-emerald-600"><MapPin size={18} /></div>} label="الموقع" value={<div className="space-y-1"><div>من الدمام / وزائر الطائف - حي الوسام (3)</div><div className="text-sm text-zinc-600">للشقق الفندقية Bee House</div><a href="https://maps.app.goo.gl/9EJ7sBtd3Z41inh48?g_st=ic" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-emerald-600 hover:text-emerald-700 underline">انقر هنا للوصول للموقع</a></div>} />
+              <ProfileItem icon={<div className="p-2 bg-emerald-50 rounded-xl text-emerald-600"><MapPin size={18} /></div>} label="الموقع" value={<div className="space-y-1"><div>من تبوك / وزائر الطائف - حي الوسام (3)</div><div className="text-sm text-zinc-600">للشقق الفندقية Bee House</div><a href="https://maps.app.goo.gl/9EJ7sBtd3Z41inh48?g_st=ic" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-emerald-600 hover:text-emerald-700 underline">انقر هنا للوصول للموقع</a></div>} />
               <ProfileItem icon={<div className="p-2 bg-amber-50 rounded-xl text-amber-600"><Calendar size={18} /></div>} label="العمر" value="24 سنة" />
             </div>
             <div className="space-y-4 md:space-y-6">
@@ -256,6 +257,7 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
         <InteractivePeekSection 
           user={user}
           showToast={showToast}
+          onPlayingChange={setPeekPlaying}
           onFeedbackUpdate={async (index, rating, comment) => {
             setPeekFeedback(prev => ({ ...prev, [index]: { rating, comment } }));
             // Award 53 points for rating
@@ -269,8 +271,8 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
           }}
         />
 
-        {/* Section: Catch Eyes - Upload Media */}
-        <MediaUploadSection user={user} />
+        {/* Section: Catch Eyes - Upload Media (hidden while peek video plays) */}
+        {!peekPlaying && <MediaUploadSection user={user} />}
 
         {/* Section: Listen to my voice */}
         <motion.section 
@@ -549,10 +551,11 @@ ${feedbackText ? `\nتقييماتي للنظرة الخاطفة:${feedbackText}
   );
 }
 
-function InteractivePeekSection({ user, showToast, onFeedbackUpdate }: { 
+function InteractivePeekSection({ user, showToast, onFeedbackUpdate, onPlayingChange }: { 
   user: any;
   showToast: (m: string, t?: 'success' | 'error') => void;
   onFeedbackUpdate: (index: number, rating: number, comment: string) => void;
+  onPlayingChange?: (playing: boolean) => void;
 }) {
   const VIDEO_LIMIT_INDEX = 4; // After 5th video (index 4), require unlock to continue
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -600,12 +603,16 @@ function InteractivePeekSection({ user, showToast, onFeedbackUpdate }: {
 
   const handlePlay = () => {
     setVideoState('playing');
+    onPlayingChange?.(true);
     if (videoRef.current) {
       videoRef.current.play().catch(err => console.error("Video play failed:", err));
     }
   };
 
-  const handleEnded = () => setVideoState('feedback');
+  const handleEnded = () => {
+    setVideoState('feedback');
+    onPlayingChange?.(false);
+  };
 
   useEffect(() => {
     if (videoState === 'playing') {
@@ -755,11 +762,16 @@ function InteractivePeekSection({ user, showToast, onFeedbackUpdate }: {
             )}
 
             {videoState === 'playing' && (
-              <div className="absolute top-4 right-4">
-                <div className="px-2 py-1 bg-black/50 backdrop-blur-md rounded text-[10px] font-bold uppercase tracking-widest text-white/80 border border-white/10">
-                  Live Preview
+              <>
+                <div className="absolute top-4 right-4">
+                  <div className="px-2 py-1 bg-black/50 backdrop-blur-md rounded text-[10px] font-bold uppercase tracking-widest text-white/80 border border-white/10">
+                    Live Preview
+                  </div>
                 </div>
-              </div>
+                <div className="absolute top-4 left-4 px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-full text-xs font-bold text-amber-300 border border-white/10">
+                  شارك بفيديو أو صورة
+                </div>
+              </>
             )}
           </div>
         </div>
