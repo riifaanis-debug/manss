@@ -1,23 +1,23 @@
+# التعديلات المطلوبة
 
+## 1. تحديث الموقع في النبذة الشخصية
 
-## Plan: Add Admin Account
+استبدال `الدمام` بـ`تبوك` في حقل الموقع (السطر 231):
+- النص الحالي: `من الدمام / وزائر الطائف - حي الوسام (3)`
+- النص الجديد: `من تبوك / وزائر الطائف - حي الوسام (3)`
+- باقي بيانات الموقع (Bee House، رابط الخريطة) تبقى كما هي.
 
-The user wants to create an admin account with email `fahad69gay@gmail.com` and assign it the admin role.
+## 2. إخفاء قسم "اخطف النظرات" أثناء تشغيل الفيديو + عرض نص "شارك بفيديو أو صورة" فوق الفيديو
 
-### Steps
+### المشكلة الحالية
+- `InteractivePeekSection` يدير حالة التشغيل (`videoState`) داخلياً.
+- عند التشغيل يتحول إلى overlay ثابت ملء الشاشة (`fixed inset-0`) مع ضبابية على الخلفية.
+- قسم `MediaUploadSection` (اخطف النظرات) يظل ظاهراً خلف الضبابية.
 
-1. **Check if user exists** — Query the database to see if this email is already registered
-2. **If not registered** — Sign up the user with the provided credentials via the app's signup flow, or guide the user to register first
-3. **Assign admin role** — Insert a record into `user_roles` table with `role = 'admin'` for this user
+### التعديل
+1. **رفع حالة التشغيل للمكوّن الأب**: إضافة prop باسم `onPlayingChange` لـ `InteractivePeekSection`، يستدعى عند تغيّر `videoState` لـ `'playing'` أو الخروج منها.
+2. **إخفاء `MediaUploadSection` أثناء التشغيل**: في المكوّن الأب، تتبع حالة `peekPlaying`، وإخفاء `<MediaUploadSection>` بالكامل عند `true` (عدم التصيير) بدلاً من تركه خلف الـ overlay.
+3. **عرض نص "شارك بفيديو أو صورة" فوق الفيديو أثناء التشغيل**: داخل overlay الفيديو في `InteractivePeekSection` (عند `videoState === 'playing'`)، إضافة عنصر نصي متراكب أسفل/وسط الفيديو يعرض `شارك بفيديو أو صورة` بتنسيق واضح (شبه شفاف بخلفية داكنة) ليظهر فوق الفيديو المشغّل.
 
-### Technical Details
-
-- The `handle_new_user` trigger already creates a profile and assigns the default `user` role on signup
-- After signup, a migration will insert an admin role: `INSERT INTO user_roles (user_id, role) SELECT id, 'admin' FROM auth.users WHERE email = 'fahad69gay@gmail.com'`
-- This uses the existing `has_role` security definer function that the admin panel already relies on
-
-### What I Need To Do
-
-1. First register the user (or confirm they exist)
-2. Run a database migration to grant admin role
-
+### ملفات متأثرة
+- `src/routes/index.tsx`
